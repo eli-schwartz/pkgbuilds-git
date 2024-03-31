@@ -136,6 +136,11 @@ fi
 export CFLAGS+=' -D_LARGEFILE64_SOURCE'
 export CXXFLAGS+=' -D_LARGEFILE64_SOURCE'
 
+# Add -ffat-lto-objects flag to LTOFLAGS to prevent mangling of static libs.(gcc)
+# In clang-16, there seems to be no problem without this option specified.
+# (The -ffat-lto-objects option is planned to be supported from clang-17.)
+[[ $CC =~ gcc ]] && export LTOFLAGS+=" -fuse-linker-plugin -ffat-lto-objects"
+
 # keep using xz-compressed packages, because one use of the package is to
 # recover on systems with broken zstd support in libarchive
 [[ $PKGEXT = .pkg.tar.zst ]] && PKGEXT=.pkg.tar.xz
