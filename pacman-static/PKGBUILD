@@ -3,30 +3,38 @@
 # All my PKGBUILDs are managed at https://github.com/eli-schwartz/pkgbuilds
 
 pkgname=pacman-static
-pkgver=6.0.0
-_cares_ver=1.17.1
-_nghttp2_ver=1.43.0
-_curlver=7.77.0
-_sslver=1.1.1k
-_zlibver=1.2.11
-_xzver=5.2.5
+pkgver=6.1.0
+_cares_ver=1.27.0
+_nghttp2_ver=1.60.0
+_curlver=8.6.0
+_sslver=3.2.1
+_zlibver=1.3.1
+_xzver=5.6.1
 _bzipver=1.0.8
-_zstdver=1.5.0
-_libarchive_ver=3.5.1
-_gpgerrorver=1.42
-_libassuanver=2.5.5
-_gpgmever=1.15.1
-pkgrel=1
+_zstdver=1.5.5
+_libarchive_ver=3.7.2
+_gpgerrorver=1.48
+_libassuanver=2.5.6
+_gpgmever=1.23.2
+pkgrel=7
 pkgdesc="Statically-compiled pacman (to fix or install systems without libc)"
-arch=('i686' 'x86_64' 'arm' 'armv6h' 'armv7h' 'aarch64')
+arch=('i486' 'i686' 'pentium4' 'x86_64' 'arm' 'armv6h' 'armv7h' 'aarch64')
 url="https://www.archlinux.org/pacman/"
 license=('GPL-2.0-or-later')
 depends=('pacman')
-makedepends=('meson' 'musl' 'kernel-headers-musl')
+makedepends=('meson' 'musl' 'kernel-headers-musl' 'git')
 options=('!emptydirs')
 
 # pacman
-source=("https://sources.archlinux.org/other/pacman/pacman-${pkgver}.tar.xz"{,.sig})
+source=("https://gitlab.archlinux.org/pacman/pacman/-/releases/v$pkgver/downloads/pacman-$pkgver.tar.xz"{,.sig}
+        revertme-makepkg-remove-libdepends-and-libprovides.patch::https://gitlab.archlinux.org/pacman/pacman/-/commit/354a300cd26bb1c7e6551473596be5ecced921de.patch
+        "$pkgname-fix-msg-unknown-key.patch::https://gitlab.archlinux.org/pacman/pacman/-/commit/6bb95c8856437513ee0ab19226bc090d6fd0fb06.patch"
+        "$pkgname-man-gitlab.patch::https://gitlab.archlinux.org/pacman/pacman/-/commit/95f148c2222db608a0d72d5c5577d0c71e7fa199.patch"
+        "$pkgname-make-aligned-titles.patch::https://gitlab.archlinux.org/pacman/pacman/-/commit/5e0496260b7d3f9c9fcf2b1c4899e4dbcc20ff03.patch"
+        "$pkgname-repo-add-parseopts.patch::https://gitlab.archlinux.org/pacman/pacman/-/commit/0571ee82bff0edbd5ffac2228d4e6ac510b9008e.patch"
+        "$pkgname-drop-result-warn.patch::https://gitlab.archlinux.org/pacman/pacman/-/commit/111eed0251238a9d3f90e76d62f2ac01aeccce48.patch"
+        "$pkgname-fix-debugedit.patch::https://gitlab.archlinux.org/pacman/pacman/-/commit/bae9594ac1806ce30f2af1de27c49bb101a00d44.patch")
+
 validpgpkeys=('6645B0A8C7005E78DB1D7864F99FFE0FEAE999BD'  # Allan McRae <allan@archlinux.org>
               'B8151B117037781095514CA7BBDFFC92306B1121') # Andrew Gregory (pacman) <andrew@archlinux.org>
 # nghttp2
@@ -36,17 +44,25 @@ source+=("https://c-ares.haxx.se/download/c-ares-${_cares_ver}.tar.gz"{,.asc})
 validpgpkeys+=('27EDEAF22F3ABCEB50DB9A125CC908FDB71E12C2') # Daniel Stenberg <daniel@haxx.se>
 # curl
 source+=("https://curl.haxx.se/download/curl-${_curlver}.tar.gz"{,.asc})
+validpgpkeys+=('27EDEAF22F3ABCEB50DB9A125CC908FDB71E12C2') # Daniel Stenberg
 # openssl
 source+=("https://www.openssl.org/source/openssl-${_sslver}.tar.gz"{,.asc}
          "ca-dir.patch")
+validpgpkeys+=('8657ABB260F056B1E5190839D9C4D26D0E604491'
+              '7953AC1FBC3DC8B3B292393ED5E9E43F7DF9EE8C'
+              'A21FAB74B0088AA361152586B8EF1A6BA9DA2D5C'
+              'EFC0A467D613CB83C7ED6D30D894E2CE8B3D79F5')
+
 validpgpkeys+=('8657ABB260F056B1E5190839D9C4D26D0E604491'  # Matt Caswell <matt@openssl.org>
-               '7953AC1FBC3DC8B3B292393ED5E9E43F7DF9EE8C') # Richard Levitte <levitte@openssl.org>
+              '7953AC1FBC3DC8B3B292393ED5E9E43F7DF9EE8C'   # Matt Caswell <matt@openssl.org>
+              'A21FAB74B0088AA361152586B8EF1A6BA9DA2D5C'   # Tomá? Mráz <tm@t8m.info>
+              'EFC0A467D613CB83C7ED6D30D894E2CE8B3D79F5')  # OpenSSL security team key
 # zlib
 source+=("https://zlib.net/zlib-${_zlibver}.tar.gz"{,.asc})
 validpgpkeys+=('5ED46A6721D365587791E2AA783FCD8E58BCAFBA') # Mark Adler <madler@alumni.caltech.edu>
 # xz
-source+=("https://tukaani.org/xz/xz-${_xzver}.tar.gz"{,.sig})
-validpgpkeys+=('3690C240CE51B4670D30AD1C38EE757D69184620') # Lasse Collin <lasse.collin@tukaani.org>
+source+=("git+https://git.tukaani.org/xz.git#tag=v${_xzver}")
+validpgpkeys+=('3690C240CE51B4670D30AD1C38EE757D69184620')  # Lasse Collin <lasse.collin@tukaani.org>
 # bzip2
 source+=("https://sourceware.org/pub/bzip2/bzip2-${_bzipver}.tar.gz"{,.sig})
 validpgpkeys+=('EC3CFE88F6CA0788774F5C1D1AA44BE649DE760A') # Mark Wielaard <mark@klomp.org>
@@ -55,68 +71,52 @@ source+=("https://github.com/facebook/zstd/releases/download/v${_zstdver}/zstd-$
 validpgpkeys+=('4EF4AC63455FC9F4545D9B7DEF8FE99528B52FFD') # Zstandard Release Signing Key <signing@zstd.net>
 # libgpg-error
 source+=("https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-${_gpgerrorver}.tar.bz2"{,.sig})
-validpgpkeys+=('6DAA6E64A76D2840571B4902528897B826403ADA'  # "Werner Koch (dist signing 2020)"
-               '031EC2536E580D8EA286A9F22071B08A33BD3F06') # NIIBE Yutaka (GnuPG Release Key) <gniibe@fsij.org>
+validpgpkeys+=('D8692123C4065DEA5E0F3AB5249B39D24F25E3B6'  # Werner Koch
+               '031EC2536E580D8EA286A9F22071B08A33BD3F06'  # NIIBE Yutaka (GnuPG Release Key) <gniibe@fsij.org>
+               '6DAA6E64A76D2840571B4902528897B826403ADA') # "Werner Koch (dist signing 2020)"
 # libassuan
 source+=("https://gnupg.org/ftp/gcrypt/libassuan/libassuan-${_libassuanver}.tar.bz2"{,.sig})
 # gpgme
 source+=("https://www.gnupg.org/ftp/gcrypt/gpgme/gpgme-${_gpgmever}.tar.bz2"{,.sig})
+validpgpkeys+=('AC8E115BF73E2D8D47FA9908E98E9B2D19C6C8BD') #  Niibe Yutaka (GnuPG Release Key)
 # libarchive
-source+=("https://github.com/libarchive/libarchive/releases/download/${_libarchive_ver}/libarchive-${_libarchive_ver}.tar.xz"{,.asc})
-validpgpkeys+=('A5A45B12AD92D964B89EEE2DEC560C81CEC2276E') # Martin Matuska <mm@FreeBSD.org>
+source+=("https://github.com/libarchive/libarchive/releases/download/v${_libarchive_ver}/libarchive-${_libarchive_ver}.tar.xz"{,.asc})
+validpgpkeys+=('A5A45B12AD92D964B89EEE2DEC560C81CEC2276E'  # Martin Matuska <mm@FreeBSD.org>
+              'DB2C7CF1B4C265FAEF56E3FC5848A18B8F14184B') # Martin Matuska <martin@matuska.org>
 
-sha512sums=('78fc5b70a2fc356746f8a4580ce7fd01b25b3463db1b9b008f02a97e22c236fdb1d09985769caf6ac675d9b1091ba0f71afa38ec5759cf7911f1b1a33586f563'
+sha512sums=('da5e78506e0505aac47def4b658a8cd6012be90c7ad7f7343da2edca2df5bd019091eec0a297f79c6f2fc264c139f139175778015d928cace26cb81c87d0477b'
             'SKIP'
-            'eac69ba356870a1cba420a06771082897be8dd40a68f4e04223f41f3d22626e4f5b3766d3dbcc496dd212be01f64c3ac280a2ebddd31dd88f7350c20f56e5d39'
-            'b11887bcc9274d368088e1a8b6aca62414f20675cf0bc58e948f54fa04c327c39dd23cefe7509eec6397db14b550a3f6b77f5c18b3d735b3eef48ce2da1dcd00'
+            '1a108c4384b6104e627652488659de0b1ac3330640fc3250f0a283af7c5884daab187c1efc024b2545262da1911d2b0b7b0d5e4e5b68bb98db25a760c9f1fb1a'
+            'b50a8c7734c884f2a645eba18a42081d8d6becf77cef04467ac1b755dcf58f8e79fc9a65cb9b2fda11ca87f1150a685adcf2d11b4a20441472b2f68e830c9394'
+            'fb79497bd2ea6d12a2234aa6b0acae0341cbdf1bd6358c4eb5e20548f4edf6b7159abcae0635574b1b0e1e05e34e73f11afa463f32f43bcb156bef3d5e2a3663'
+            '22ee8654ee131292eb124170544bf15aeb70922049c5447f33c5e211a6b489bde9feb6fc1ef3022ad09b7b5d781edad1c233110cea1b6638e4f7a3bf9b716d09'
+            '35e1b7f37dc440317c2f1530f0d8ce2c8cd1ef4ddc0d68a22e89f792e53ce9f48719abd9661378b31496b780ad493dbc13a73770385a7af35595941007971aa5'
+            '8adb3696579e3b771a7a61dd6ff013afb1444bbb087a0a71f3971da4d51e6b304ad631cbafe8187c837bd763b1a3298e2bd19605438d515743a73ff24192e33f'
+            '2ff45ed5e27b1d90524ec0de45acf55891b6f5bf7242dbfeec5c370b7c5d6e35eb49254b19f2a2d194dbab38fa27bca34afaf6175888a911a105237f2bab8d19'
+            '5e6365d9118596d41848930de70f4a918d72463920184df60a7e1678c3a6c9cf1416236888e7e34395c87f41bba00a114994ba5a6e73f6a389769abf1b5cc842'
+            'd0bffeeabdc5f1d4cececd46bd495b8224a64eaaf6d2a91c5475517440effe0e096146a1ebf19ece07367198be576c61b11961d5e4c3f601c5c5529ce4fcb46a'
             'SKIP'
-            'cacd85eb9b2ad90f59595b497035f4660b6c5cff2d653da939c9ceac6dd8dd4bc7bdcb2dfd251862af0c29b9299312bf7271ed0249734fca979c9588799635d6'
+            '43fdb6b81b394f3382d353d5f57673b2b3d26cfe34b25d08a526bc0597f508d5298e5a7088d0736d1f139cad19cd922affa51533c3a5a4bb5f2de68891c2958d'
             'SKIP'
-            '73cd042d4056585e5a9dd7ab68e7c7310a3a4c783eafa07ab0b560e7462b924e4376436a6d38a155c687f6942a881cfc0c1b9394afcde1d8c46bf396e7d51121'
+            'bab2b2419319f1feffaba4692f03edbf13b44d1090c6e075a2d69dad67a2d51e64e6edbf83456a26c83900a726d20d2c4ee4ead9c94b322fd0b536f3b5a863c4'
             'SKIP'
-            '3857c298663728a465b5f95a3ef44547efbfb420d755e9dde7f20aa3905171b400e1c126d8db5c2b916c733bbd0724d8753cad16c9baf7b12dcd225a3ee04a97'
-            '73fd3fff4adeccd4894084c15ddac89890cd10ef105dd5e1835e1e9bbb6a49ff229713bd197d203edfa17c2727700fce65a2a235f07568212d820dca88b528ae'
+            'b1873dbb7a49460b007255689102062756972de5cc2d38b12cc9f389b6be412da6797579b1acd3717a8cd2ee118fd9801b94e55f063d4328f050f0876a5eb53c'
+            'b5887ea77417fae49b6cb1e9fa782d3021f268d5219701d87a092235964f73fa72a31428b630445517f56f2bb69dcbbb24119ef9dbf8b4e40a753369a9f9a16f'
+            '580677aad97093829090d4b605ac81c50327e74a6c2de0b85dd2e8525553f3ddde17556ea46f8f007f89e435493c9a20bc997d1ef1c1c2c23274528e3c46b94f'
             'SKIP'
-            '7443674247deda2935220fbc4dfc7665e5bb5a260be8ad858c8bd7d7b9f0f868f04ea45e62eb17c0a5e6a2de7c7500ad2d201e2d668c48ca29bd9eea5a73a3ce'
             'SKIP'
             '083f5e675d73f3233c7930ebe20425a533feedeaaa9d8cc86831312a6581cefbe6ed0d08d2fa89be81082f2a5abdabca8b3c080bf97218a1bd59dc118a30b9f3'
             'SKIP'
-            '071b4596afbb290fdfab0021b1ddda3e24f508680c643259ced683ec4685fca186f6c9c111097594d2d2911976df1a2f92a321ae71a0d5b9734c9f8e2c1bff76'
+            'c2d88b2c2050262f85be32877142c94e36a8ee451890f579cd2426c7de565fb22d21c369bad11f306093f0b356e935cef5a8ff5a2b0c007ade0f7e7eb944d2a5'
             'SKIP'
-            'f6d95712a874edefc39a7746062c8037a62801a550560c5b2eab08b5b86987c1de5be60eba5fcb56d35a37db109aa32d07b7eff2bb99800c1c47d2227421a8f4'
+            '3e9ea99cfb7d706791eb3349a9356b6bc44a53ef8bfa9a4e89afb5203dad5af3f466a039a1764361c0c7f697a6fa668a21d05ceaeb8e44ec5a11d6468998adf2'
             'SKIP'
-            '70117f77aa43bbbe0ed28da5ef23834c026780a74076a92ec775e30f851badb423e9a2cb9e8d142c94e4f6f8a794988c1b788fd4bd2271e562071adf0ab16403'
+            'dcca942d222a2c226a7e34ba7988ee0c3c55bd6032166eb472caf2053db89aeeea7a40e93d8c2887c7ee73c5f838e8b0725e8cfb595accc1606646559362f7ee'
             'SKIP'
-            '1d75a848cce6389f7cb8896b57a28dfe1dc5a447bfb4f128b0994a43e04134343400a3be063e971f03dfd595474cfd558519741d5d56afb3e84853ad4f2a45c2'
+            '6cfcd07e81a93de240582de5a46545420cee93d1f27fe20ea2c983780fdd3036b69fdba073cf549d68a20791e189bf4b3cdde14a43f912d2ab9ef3414c83ac75'
             'SKIP'
-            '04ad3e98e840fee19eb4c2652f29eccef1cffc071fd5c6a6feb358fea6048699281c7baacbb9ca8f823b1bfaaef6d4c87d9cf6a8b0c28aab53b75b2d259b2045'
+            'a21bebb27b808cb7d2ed13a70739904a1b7b55661d8dea83c9897a0129cf71e20c962f13666c571782ff0f4f753ca885619c2097d9e7691c2dee4e6e4b9a2971'
             'SKIP')
-b2sums=('79443cbee5df7b367267c70da04d570455a42d9cfa2e623333fd30e640d3cd9f01da382134efcd1c84202331499fd134b23dde8788a89f6949f0eb40e0e7a38b'
-        'SKIP'
-        '0e6c674486c484558a55822501a13ac93c4e890cf62749bc8519690f468912701329b7b9e83b0b68c3f35b72442b1ed47a90050cccd3fc05d79622e1e26634dc'
-        '31dac21ecae231e2a201dc1ba954c1a0663a06f93eb8e7e033ca3c6d385f53e07af0b04854739f1ee8a7f0693f67f620143e152ef092b49342c62279a0480905'
-        'SKIP'
-        'b75e0de2f4134444d62c4495e11045181bb10624c0b48efcfdd45d18749936293b9f1b1f3b59b7c80e997d144a6be266b3cd945a147281a193aa040b6995e6be'
-        'SKIP'
-        'e9bd90f17bc819c4960d07bbee04346e8a7adb87a764a09d033ef76f1d638c67b180c4f2beb84ec25fbff54ccc9c14c13b9b16a27cac231a5dd22b02635d5cec'
-        'SKIP'
-        'e2ff99e8236487f43171c771d0ee89137b73f3d0b2756bcb0d6525c810ffa9f5a3763c3744327fb47cef21eabfc50fff96632f4bbe2cd244206a99daffa0c25a'
-        '6bfc4bca5dcadba8a0d4121a2b3ed0bfe440c261003521862c8e6381f1a6f0a72d3fc037351d30afd7ef321e8e8d2ec817c046ac749f2ca0c97fbdc2f7e840b7'
-        'SKIP'
-        'aded57324e129572c41646b3cc3b0b59a459452d9338d9245663b63dac2a463fb1f1b2b1d2d4ad3c09cb71fb8439df52cd94f24db99e782fc899b94a288a3043'
-        'SKIP'
-        '22ab3acd84f4db8c3d6f59340c252faedfd4447cea00dafbd652e65b6cf8a20adf6835c22e58563004cfafdb15348c924996230b4b23cae42da5e25eeac4bdad'
-        'SKIP'
-        'cfea18b2347bf893d9bd461e57113d0a141040a1f7a42db6221ed9662f84023f45b058df3382cc06d82596f8eb98e0806f3abe1e79155fafd46da2a8b746bfbe'
-        'SKIP'
-        'eb3381ec7106cfe5dca333391f473e97b03df83f247d3067e9f933ed7206f826e59d2b74b8c28d41e785ffe1c2980b680470064eb2fa2ff1ee3d8fa8be5b81a8'
-        'SKIP'
-        '24952e97c757b97c387ab4c2c4bf7b040f2874e9326c129805c7f5326fa14d80e083b0842e336a635531a2c8d4a66d428c816bae6b175f1c4518add1ffa3554d'
-        'SKIP'
-        'd3a6ccaa35360ed3fc79364dfcc3f2fdcb70e5e41ac72ef011373a39d5def9be9ce1be45843ab65a87630d3fc570d29db5f40b9a273aa8e281464c9d1d3477de'
-        'SKIP'
-        '0be26a858bffc48bc3dea64e7ea16a703fd7dae1c37dd93e1acde291b6799e323461b3b0bb31c12f63e3429aa4be72d88636606d786978f8d56b94dd2dc144c7'
-        'SKIP')
 
 export LDFLAGS="$LDFLAGS -static"
 export CC=musl-gcc
@@ -124,7 +124,7 @@ export CXX=musl-gcc
 
 # https://www.openwall.com/lists/musl/2014/11/05/3
 # fstack-protector and musl do not get along but only on i686
-if [[ $CARCH = i686 ]]; then
+if [[ $CARCH = i686 || $CARCH = pentium4 || $CARCH = i486 ]]; then
     # silly build systems have configure checks or buildtime programs that don't CFLAGS but do do CC
     export CC="musl-gcc -fno-stack-protector"
     export CXX="musl-gcc -fno-stack-protector"
@@ -132,9 +132,36 @@ if [[ $CARCH = i686 ]]; then
     export CXXFLAGS="${CXXFLAGS/-fstack-protector-strong/}"
 fi
 
+# to enable func64 interface in musl for 64-bit file system functions
+export CFLAGS+=' -D_LARGEFILE64_SOURCE'
+export CXXFLAGS+=' -D_LARGEFILE64_SOURCE'
+
 # keep using xz-compressed packages, because one use of the package is to
 # recover on systems with broken zstd support in libarchive
 [[ $PKGEXT = .pkg.tar.zst ]] && PKGEXT=.pkg.tar.xz
+
+prepare() {
+    # pacman
+    cd "${srcdir}"/pacman-${pkgver}
+    local src
+    for src in "${source[@]}"; do
+        src="${src%%::*}"
+        src="${src##*/}"
+        [[ $src = pacman-*.patch ]] || continue
+        msg2 "Applying pacman patch $src..."
+        patch -Np1 < "../$src"
+    done
+
+    # openssl
+    cd "${srcdir}"/openssl-${_sslver}
+    patch -Np1 -i "${srcdir}/ca-dir.patch"
+    case ${CARCH} in
+        arm|armv6h|armv7h)
+            # special patch to omit -latomic when installing pkgconfig files
+            msg2 "Applying openssl patch openssl-3.0.7-no-atomic.patch..."
+            patch -Np1 -i "${srcdir}/openssl-3.0.7-no-atomic.patch"
+    esac
+}
 
 build() {
     export PKG_CONFIG_PATH="${srcdir}"/temp/usr/lib/pkgconfig
@@ -147,9 +174,17 @@ build() {
             openssltarget='linux-x86_64'
             optflags='enable-ec_nistp_64_gcc_128'
             ;;
-        i686)
+        pentium4)
             openssltarget='linux-elf'
             optflags=''
+            ;;
+        i686)
+            openssltarget='linux-elf'
+            optflags='no-sse2'
+            ;;
+        i486)
+            openssltarget='linux-elf'
+            optflags='386 no-threads'
             ;;
         arm|armv6h|armv7h)
             openssltarget='linux-armv4'
@@ -173,7 +208,8 @@ build() {
     make install_dev
 
     # xz
-    cd "${srcdir}"/xz-${_xzver}
+    cd "${srcdir}"/xz
+    ./autogen.sh --no-po4a --no-doxygen
     ./configure --prefix="${srcdir}"/temp/usr \
                 --disable-shared
     cd src/liblzma
@@ -204,7 +240,7 @@ build() {
         ./configure --prefix="${srcdir}"/temp/usr \
                     --without-xml2 \
                     --without-nettle \
-                    --disable-{bsdtar,bsdcat,bsdcpio} \
+                    --disable-{bsdtar,bsdcat,bsdcpio,bsdunzip} \
                     --without-expat \
                     --disable-shared
     make
@@ -236,8 +272,8 @@ build() {
     ./configure --prefix="${srcdir}"/temp/usr \
                 --disable-shared \
                 --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt \
-                --disable-{dict,gopher,imap,imaps,ldap,ldaps,manual,pop3,pop3s,rtsp,scp,sftp,smb,smbs,smtp,smtps,telnet,tftp} \
-                --without-{brotli,libidn2,librtmp,libssh2} \
+                --disable-{dict,gopher,imap,ldap,ldaps,manual,pop3,rtsp,smb,smtp,telnet,tftp} \
+                --without-{brotli,libidn2,librtmp,libssh2,libpsl} \
                 --disable-libcurl-option \
                 --with-openssl \
                 --enable-ares="${srcdir}"/temp/usr
@@ -251,7 +287,7 @@ build() {
     ./configure --prefix="${srcdir}"/temp/usr \
         --disable-shared
     make -C src
-    make -C src install-{{,dist_}binSCRIPTS,libLTLIBRARIES,nodist_includeHEADERS,pkgconfigDATA}
+    make -C src install-{binSCRIPTS,libLTLIBRARIES,nodist_includeHEADERS,pkgconfigDATA}
 
     # libassuan
     cd "${srcdir}"/libassuan-${_libassuanver}
@@ -283,7 +319,8 @@ build() {
         -Dbuildstatic=true \
         -Ddefault_library=static \
         -Ddoc=disabled \
-        -Dldcofig=/usr/bin/ldconfig \
+        -Ddoxygen=disabled \
+        -Dldconfig=/usr/bin/ldconfig \
         -Dscriptlet-shell=/usr/bin/bash \
         ..
     ninja
